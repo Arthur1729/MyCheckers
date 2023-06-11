@@ -1,12 +1,12 @@
-п»ї#include "Board.h"
+#include "Board.h"
 
 Board::Board() {}
 
-// РќР°СЂРёСЃРѕРІР°С‚СЊ РёРіСЂРѕРІСѓСЋ РґРѕСЃРєСѓ
+// Нарисовать игровую доску
 void Board::draw(sf::RenderWindow& m_window) {
     initBoard(m_window);
 
-    // Р РёСЃСѓРµРј РєР»РµС‚РєРё РЅР° РґРѕСЃРєРµ
+    // Рисуем клетки на доске
     for (int row = 0; row < mNumSquaresPerRow; ++row) {
         for (int col = 0; col < mNumSquaresPerRow; ++col) {
             sf::RectangleShape square;
@@ -18,17 +18,18 @@ void Board::draw(sf::RenderWindow& m_window) {
             else {
                 square.setFillColor(sf::Color::Black);
             }
+            std::cout << "Hellp";
             m_window.draw(square);
         }
     }
 
-    // Р РёСЃСѓРµРј С€Р°С€РєРё РЅР° РґРѕСЃРєРµ
+    // Рисуем шашки на доске
     for (int i = 0; i < 12; ++i) {
         m_window.draw(mCheckerPieces[i]);
     }
 }
 
-// РЎРѕР·РґР°РµРј С€Р°С€РєРё РЅР° РґРѕСЃРєРµ
+// Создаем шашки на доске
 void Board::createCheckerPiece(sf::RectangleShape& rect, sf::Color fill_color, sf::Vector2f position) {
     rect.setSize(sf::Vector2f(mSquareSize * 0.4, mSquareSize * 0.4));
     rect.setFillColor(fill_color);
@@ -38,47 +39,47 @@ void Board::createCheckerPiece(sf::RectangleShape& rect, sf::Color fill_color, s
     rect.setPosition(position);
 }
 
-// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃРІРѕР№СЃС‚РІР° РґРѕСЃРєРё
+// Инициализируем свойства доски
 void Board::initBoard(sf::RenderWindow& m_window) {
     mScreenWidth = m_window.getSize().x;
     mScreenHeight = m_window.getSize().y;
     mStartX = (mScreenWidth / 3) + (mScreenWidth * 0.66) / 12;
     mSquareSize = (mScreenWidth / mNumSquaresPerRow) * 0.55;
     mBlackSquareShape.setSize(sf::Vector2f(mSquareSize, mSquareSize));
-    mBlackSquareShape.setFillColor(sf::Color::Yellow);
+    mBlackSquareShape.setFillColor(sf::Color::Black);
     mWhiteSquareShape.setSize(sf::Vector2f(mSquareSize, mSquareSize));
-    mWhiteSquareShape.setFillColor(sf::Color::Red);
+    mWhiteSquareShape.setFillColor(sf::Color::White);
 }
 
-// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РёРіСЂРѕРІС‹Рµ РѕР±СЉРµРєС‚С‹
+// Устанавливаем игровые объекты
 void Board::initGameObjects() {}
 
-// РќР°СЃС‚СЂР°РёРІР°РµРј РёРіСЂРѕРІСѓСЋ Р»РѕРіРёРєСѓ
+// Настраиваем игровую логику
 void Board::initGameLogic() {}
 
-// РЎР±СЂР°СЃС‹РІР°РµРј РёРіСЂСѓ
+// Сбрасываем игру
 void Board::resetGame() {}
 
-// Р’С‹Р±РѕСЂ С€Р°С€РєРё
+// Выбор шашки
 bool Board::checkIfCheckerCanBeSelected(int checkerIndex) {
-    // TODO: СЂРµР°Р»РёР·РѕРІР°С‚СЊ РјРµС‚РѕРґ
+    // TODO: реализовать метод
     return true;
 }
 void Board::selectChecker(int checkerIndex) {}
 void Board::deselectChecker() {}
 
-// Р”РІРёР¶РµРЅРёРµ С€Р°С€РєРё
+// Движение шашки
 bool Board::checkIfSquareIsValidMove(sf::Vector2i clickedSquare) {
-    // TODO: СЂРµР°Р»РёР·РѕРІР°С‚СЊ РјРµС‚РѕРґ
+    // TODO: реализовать метод
     return true;
 }
 void Board::moveSelectedChecker(sf::Vector2i clickedSquare) {}
 
-// РЎРјРµРЅР° РёРіСЂРѕРєР°
+// Смена игрока
 void Board::switchPlayerTurn() {}
 
-// РџСЂРѕРІРµСЂСЏРµРј, Р±С‹Р»Рѕ Р»Рё Р·Р°С…РІР°С‡РµРЅРѕ
+// Проверяем, было ли захвачено
 bool Board::checkIfMoveHasCapture(sf::Vector2i clickedSquare) {
-    // TODO: СЂРµР°Р»РёР·РѕРІР°С‚СЊ РјРµС‚РѕРґ
+    // TODO: реализовать метод
     return false;
 }
