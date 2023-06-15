@@ -1,5 +1,5 @@
 #include "Game.h"
-#include "Timer.h"
+
 #include "Board.h"
 
 Game::Game() : m_window(sf::VideoMode(1920, 1080), "MyCheckers", sf::Style::Fullscreen)
@@ -9,8 +9,7 @@ Game::Game() : m_window(sf::VideoMode(1920, 1080), "MyCheckers", sf::Style::Full
 
 void Game::run()
 {
-    Timer* times = new Timer();
-    bool Paused = false;
+ 
 
     sf::Vector2u windowSize = m_window.getSize();
     unsigned int windowWidth = windowSize.x;
@@ -29,12 +28,7 @@ void Game::run()
     Logo_text.setFillColor(TextColor);
     Logo_text.setStyle(sf::Text::Bold);
 
-    Settings.setFont(Logo_font);
-    Settings.setPosition(0, windowHeight - windowHeight / 3);
-    Settings.setCharacterSize(108);
-    Settings.setFillColor(TextColor);
-    Settings.setStyle(sf::Text::Bold);
-    Settings.setString("Settings");
+
 
     Background_sprite.setTexture(Background_texture);
 
@@ -57,16 +51,7 @@ void Game::run()
             {
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {
-                    if (times->RestartButton_sprite.getGlobalBounds().contains(mouseX, mouseY))
-                    {
-                        times->reset();
-                        times->updateTime();
-                    }
-
-                    if (times->PauseButton_sprite.getGlobalBounds().contains(mouseX, mouseY))
-                    {
-                        Paused = !Paused;
-                    }
+                   
                 }
             }
         }
@@ -74,32 +59,9 @@ void Game::run()
         m_window.clear();
         m_window.draw(Background_sprite);
         m_window.draw(Logo_text);
-        m_window.draw(times->RestartButton_sprite);
-        m_window.draw(times->timer);
-        m_window.draw(times->PauseButton_sprite);
-        m_window.draw(Settings);
 
-        // Сдвиг позиции фигур шашек
-        sf::Vector2f boardPosition = board.getPosition();
-        float pieceOffsetX = board.getCellSize() / 2;
-        float pieceOffsetY = board.getCellSize() / 2;
-        sf::Vector2f piecePosition = boardPosition + sf::Vector2f(pieceOffsetX, pieceOffsetY);
 
-        // Отрисовка фигур шашек на доске
-        for (int i = 0; i < board.getRows(); i++)
-        {
-            for (int j = 0; j < board.getColumns(); j++)
-            {
-                sf::RectangleShape& piece = board.getCellShape(i, j);
-                piece.setPosition(piecePosition);
-                m_window.draw(piece);
-
-                piecePosition.x += board.getCellSize();
-            }
-            piecePosition.x = boardPosition.x + pieceOffsetX;
-            piecePosition.y += board.getCellSize();
-        }
-
+      
         m_window.display();
     }
 }
