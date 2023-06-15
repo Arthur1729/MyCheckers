@@ -10,10 +10,20 @@ Board::Board(const sf::Vector2f& position, float cellSize, int rows, int columns
         for (int col = 0; col < columns; ++col)
         {
             sf::RectangleShape& cell = m_cells[row * columns + col];
-            cell.setSize(sf::Vector2f(cellSize, cellSize));
-            cell.setPosition(position.x + col * cellSize, position.y + row * cellSize);
 
-            
+                cell.setSize(sf::Vector2f(cellSize, cellSize));
+                cell.setPosition(position.x + col * cellSize, position.y + row * cellSize);
+                // Цветы чередуются между четными и нечетными строками
+                if ((row + col) % 2 == 0)
+                {
+                    cell.setFillColor(sf::Color::Black);
+                }
+                else
+                {
+                    cell.setFillColor(sf::Color::White);
+                }
+                cell.setOutlineThickness(1.f);
+                cell.setOutlineColor(sf::Color::Black);
         }
     }
 }
