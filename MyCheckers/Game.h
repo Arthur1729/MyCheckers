@@ -7,7 +7,8 @@ class Game
 public:
 	Game();
 	void run();
-
+	sf::FloatRect rect(float x, float y, float b, float c);
+	sf::RectangleShape rect(sf::Vector2f(float n,float b));
 protected:
 	void drawChessboard(sf::RenderWindow& window);
 	sf::RenderWindow m_window;
@@ -16,6 +17,6 @@ protected:
 	sf::Text Settings;
 	sf::Texture Background_texture;
 	sf::Sprite Background_sprite;
-	
+	bool m_checkerSelected;
 };
 
