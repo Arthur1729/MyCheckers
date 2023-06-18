@@ -37,7 +37,9 @@ public:
     };
     
 
-private:
+private: 
+    bool CheckCellsForMove(std::vector<sf::CircleShape*>& checkers, const sf::Vector2f& position, sf::Color color);
+    bool CheckForHit(std::vector<sf::CircleShape*>& checkers, const sf::Vector2f& position, sf::Vector2f hitPos, sf::Color color);
     sf::Vector2f m_position;
     float m_cellSize = 135;
     int m_rows;

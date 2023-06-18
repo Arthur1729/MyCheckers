@@ -10,7 +10,7 @@ public:
 	sf::FloatRect rect(float x, float y, float b, float c);
 	sf::RectangleShape rect(sf::Vector2f(float n,float b));
 	sf::CircleShape* selectedChecker = nullptr;
-
+	sf::CircleShape* hitChecker = nullptr;
 protected:
 	void drawChessboard(sf::RenderWindow& window);
 	sf::RenderWindow m_window;

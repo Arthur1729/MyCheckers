@@ -41,91 +41,73 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
     bool RightCellIsFull = false;
     bool NextFromLeftCell = false;
     bool NextFromRightCell = false;
-    bool OneHitL = false;
-    bool OneHitR = false;
-
+    bool NextFromRDCell = false;
+    bool NextFromLDCell = false;
+    bool Lmove = false;
+    bool Rmove = false;
+    bool rDmove = false;
+    bool lDmove = false;
     std::vector<sf::Vector2f> MovementVector;
+
     if (color == sf::Color::Red)
     {
         int newPosition1 = position.x - 135;
         int newPosition2 = position.y + 135; //y для хода слеваВниз
         int newPos3 = position.x + 135;
         int newPos4 = position.y + 135;// y для хода справаВниз
-       
-        // Проверка на занятость позиции слева/справa
-        for (sf::CircleShape* checker : checkers)
-        {   // Проверка на наличие свободных полей для перемещения пешек на доске
-            sf::Vector2f chckPos = checker->getPosition();
-            for (int i=0;i<m_cells.size()-1; i++)
-            {
-                if (m_cells[i].getGlobalBounds().contains(newPosition1, newPosition2) && m_cells[i].getGlobalBounds().contains(chckPos)) // Если поле находится на координатах след. хода и содержит в ней пешку(проверка слеваВнизу)
-                {
-                   
-                    LeftCellIsFull = true; // Следовательно влево нельзя идти, так как клетка содержит пешку какого либо цвета
-                    m_cells[i].setFillColor(sf::Color::Yellow);
-                   
-                    if (checker->getFillColor() == sf::Color::Green) 
-                    {   
-                        OneHitL = true;// Пешку слева(внизу) можно сбить, если ...
-                        for (sf::CircleShape* checker1 : checkers)
-                        {
-                            for (auto& cell : m_cells)
-                            {       
-                                if (cell.getGlobalBounds().contains(newPosition1 - 135, newPosition2 + 135) && cell.getGlobalBounds().contains(checker1->getPosition()))
-                                {   // Если след. после пешки которую хотим сбить занята,то нельзя сбивать
-                                    NextFromLeftCell = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    }
+        int LeftDownHitPosX = position.x-135;
+        int LeftDownHitPosY = position.y-135;
+        int RightDownHitPosX = position.x+135;
+        int RightDownHitPosY = position.y-135;
+        Lmove = CheckCellsForMove(checkers, sf::Vector2f(newPosition1, newPosition2),color);
+        if (!Lmove) NextFromLeftCell = CheckForHit(checkers, sf::Vector2f(newPosition1, newPosition2), sf::Vector2f(newPosition1 - 135, newPosition2 + 135), color);
+      
+        Rmove = CheckCellsForMove(checkers, sf::Vector2f(newPos3, newPos4), color);
+        if (!Rmove)NextFromRightCell = CheckForHit(checkers, sf::Vector2f(newPos3 , newPos4 ), sf::Vector2f(newPos3 + 135, newPos4 + 135), color);
+        
+        rDmove = CheckCellsForMove(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), color);
+        if (!rDmove) NextFromRDCell = CheckForHit(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), sf::Vector2f(RightDownHitPosX+135, RightDownHitPosY-135), color);
 
-                if (m_cells[i].getGlobalBounds().contains(newPos3, newPos4) && m_cells[i].getGlobalBounds().contains(chckPos))//(Проверка справаВнизу)
-                {
-                    RightCellIsFull = true;
-                    m_cells[i].setFillColor(sf::Color::Yellow);
-                    if (checker->getFillColor() == sf::Color::Green)
-                    {
-                        OneHitR = true;// Пешку справа(внизу) можно сбить, если ...
-                        for (sf::CircleShape* checker1 : checkers)
-                        {   
-                            for (auto& cell : m_cells)
-                            {
-                                if (cell.getGlobalBounds().contains(newPos3 + 135, newPos4 + 135) && cell.getGlobalBounds().contains(checker1->getPosition()))
-                                {   // Если след. клетка после пешки которую хотим сбить занята,то нельзя сбивать
-                                    NextFromRightCell = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                   ;
-                }
+        lDmove = CheckCellsForMove(checkers, sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY), color);
+        if (!lDmove) NextFromLDCell = CheckForHit(checkers, sf::Vector2f(LeftDownHitPosX,LeftDownHitPosY), sf::Vector2f(LeftDownHitPosX - 135, LeftDownHitPosY-135), color);
 
-            }
-
-        }   
-
-
-        // Выделение синим цветов полей пригодных для хода
+        // Выделение синим цветов полей пригодных для сбития
         for (auto& cell : m_cells)
         {
-            if (OneHitL && !NextFromLeftCell && LeftCellIsFull && cell.getGlobalBounds().contains(newPosition1 - 135, newPosition2 + 135)) // Проверка условия для сбития (сбитиие всегда в приоритете над перемещением
+            if (!Lmove && NextFromLeftCell && cell.getGlobalBounds().contains(newPosition1 - 135, newPosition2 + 135)) // Проверка условия для сбития (сбитиие всегда в приоритете над перемещением
             {
                 MovementVector.push_back(sf::Vector2f(newPosition1 - 135, newPosition2 + 135));
                 cell.setFillColor(sf::Color::Blue);
 
-
-
             }
-            if (!NextFromRightCell && RightCellIsFull&&OneHitR)
+            if (NextFromRightCell &&!Rmove)
             {
                 for (auto& cell : m_cells)
                 {
                     if (cell.getGlobalBounds().contains(newPos3 + 135, newPos4 + 135)) {
                         MovementVector.push_back(sf::Vector2f(newPos3 + 135, newPos4 + 135));
+                        cell.setFillColor(sf::Color::Blue);
+                        
+                    }
+                }
+            }
+            if (NextFromLDCell && !lDmove)
+            {
+                for (auto& cell : m_cells)
+                {
+                    if (cell.getGlobalBounds().contains(LeftDownHitPosX-135, LeftDownHitPosY-135)) {
+                        MovementVector.push_back(sf::Vector2f(LeftDownHitPosX-135, LeftDownHitPosY - 135));
+                        cell.setFillColor(sf::Color::Blue);
+
+                    }
+                }
+            }
+            if (NextFromRDCell && !rDmove)
+            {
+                for (auto& cell : m_cells)
+                {
+                    if (cell.getGlobalBounds().contains(RightDownHitPosX + 135, RightDownHitPosY - 135)) {
+                        MovementVector.push_back(sf::Vector2f(RightDownHitPosX + 135, RightDownHitPosY - 135));
                         cell.setFillColor(sf::Color::Blue);
 
                     }
@@ -139,13 +121,14 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
             // Выделение синим цветов полей пригодных для хода
             for (auto& cell : m_cells)
             {   
-                if (!LeftCellIsFull && cell.getGlobalBounds().contains(newPosition1, newPosition2))
+                if ( Lmove  
+                    && cell.getGlobalBounds().contains(newPosition1, newPosition2))
                 {
                     cell.setFillColor(sf::Color::Blue);
                     MovementVector.push_back(sf::Vector2f(newPosition1, newPosition2));
                 }
 
-            if (!RightCellIsFull && cell.getGlobalBounds().contains(newPos3, newPos4))
+            if (Rmove && cell.getGlobalBounds().contains(newPos3, newPos4))
             {
                 cell.setFillColor(sf::Color::Blue);
                 MovementVector.push_back(sf::Vector2f(newPos3, newPos4));
@@ -162,74 +145,42 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
         int newPos2 = position.y - 135;
         int newPos3 = position.x + 135;
         int newPos4 = position.y - 135;
+        int LeftDownHitPosX = position.x - 135;
+        int LeftDownHitPosY = position.y + 135;
+        int RightDownHitPosX = position.x + 135;
+        int RightDownHitPosY = position.y + 135;
        
-        for (sf::CircleShape* checker : checkers)
-        {   // Проверка на наличие свободных полей для перемещения пешек на доске
-            sf::Vector2f chckPos = checker->getPosition();
-            for (int i = 0; i < m_cells.size() - 1; i++)
+       
+        Lmove = CheckCellsForMove(checkers, sf::Vector2f(newPos1, newPos2), color);
+        if (!Lmove) NextFromLeftCell = CheckForHit(checkers, sf::Vector2f(newPos1 , newPos2), sf::Vector2f(newPos1 - 135, newPos2 - 135), color);
+
+        Rmove = CheckCellsForMove(checkers, sf::Vector2f(newPos3, newPos4), color);
+        if (!Rmove)NextFromRightCell = CheckForHit(checkers, sf::Vector2f(newPos3, newPos4), sf::Vector2f(newPos3 + 135, newPos4 - 135), color);
+
+
+        rDmove = CheckCellsForMove(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), color);
+        if (!rDmove) NextFromRDCell=CheckForHit(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), sf::Vector2f(RightDownHitPosX+135, RightDownHitPosY+135), color);
+
+        lDmove = CheckCellsForMove(checkers, sf::Vector2f( LeftDownHitPosX,  LeftDownHitPosY), color);
+        if (!lDmove) NextFromLDCell=CheckForHit(checkers, sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY), sf::Vector2f(LeftDownHitPosX - 135, LeftDownHitPosY + 135), color);
+   
+
+
+                // Выделение синим цветов полей пригодных для сбития
+      
+            if (!Lmove && NextFromLeftCell ) 
             {
-                if (m_cells[i].getGlobalBounds().contains(newPos1, newPos2) && m_cells[i].getGlobalBounds().contains(chckPos)) // Если поле находится на координатах след. хода и содержит в ней пешку(проверка слеваВнизу)
+                for (auto& cell : m_cells)
                 {
-                    LeftCellIsFull = true; // Следовательно влево нельзя идти, так как клетка содержит пешку какого либо цвета
-                    m_cells[i].setFillColor(sf::Color::Yellow);
-
-                    if (checker->getFillColor() == sf::Color::Red)
-                    {
-                        OneHitL = true;// Пешку слева(вверху) можно сбить, если ...
-                        for (sf::CircleShape* checker1 : checkers)
-                        {
-                            for (auto& cell : m_cells)
-                            {
-                                if (cell.getGlobalBounds().contains(newPos1 - 135, newPos2 - 135) && cell.getGlobalBounds().contains(checker1->getPosition()))
-                                {   // Если след. после пешки которую хотим сбить занята,то нельзя сбивать
-                                    NextFromLeftCell = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
+                    if( cell.getGlobalBounds().contains(newPos1 - 135, newPos2 - 135))
+                    { 
+                        MovementVector.push_back(sf::Vector2f(newPos1 - 135, newPos2 - 135));
+                        cell.setFillColor(sf::Color::Blue);
                 }
 
-                if (m_cells[i].getGlobalBounds().contains(newPos3, newPos4) && m_cells[i].getGlobalBounds().contains(chckPos))//(Проверка справаВнизу)
-                {
-                    RightCellIsFull = true;
-                    m_cells[i].setFillColor(sf::Color::Yellow);
-                    if (checker->getFillColor() == sf::Color::Red)
-                    {
-                        OneHitR = true;// Пешку справа(внизу) можно сбить, если ...
-                        for (sf::CircleShape* checker1 : checkers)
-                        {
-                            for (auto& cell : m_cells)
-                            {
-                                if (cell.getGlobalBounds().contains(newPos3 + 135, newPos4 - 135) && cell.getGlobalBounds().contains(checker1->getPosition()))
-                                {   // Если след. клетка после пешки которую хотим сбить занята,то нельзя сбивать
-                                    NextFromRightCell = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
                 }
-
             }
-
-        }
-
-
-        // Выделение синим цветов полей пригодных для хода
-        for (auto& cell : m_cells)
-        {
-            if (OneHitL && !NextFromLeftCell && LeftCellIsFull && cell.getGlobalBounds().contains(newPos1 - 135, newPos2 - 135)) // Проверка условия для сбития (сбитиие всегда в приоритете над перемещением)
-            {
-                MovementVector.push_back(sf::Vector2f(newPos1 - 135, newPos2 - 135));
-                cell.setFillColor(sf::Color::Blue);
-
-
-
-            }
-            if (!NextFromRightCell && RightCellIsFull && OneHitR)
+            if (NextFromRightCell && !Rmove)
             {
                 for (auto& cell : m_cells)
                 {
@@ -238,45 +189,62 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                         cell.setFillColor(sf::Color::Blue);
 
                     }
+                }}
+                if (NextFromLDCell && !lDmove)
+                {
+                   
+                    for (auto& cell : m_cells)
+                    {
+                        if (cell.getGlobalBounds().contains(LeftDownHitPosX - 135, LeftDownHitPosY + 135)) {
+                            MovementVector.push_back(sf::Vector2f(LeftDownHitPosX - 135, LeftDownHitPosY + 135));
+                            cell.setFillColor(sf::Color::Blue);
+                         
+
+                        }
+                    }
                 }
-            }
+                if (NextFromRDCell && !rDmove)
+                {
+                    for (auto& cell : m_cells)
+                    {
 
+                        if (cell.getGlobalBounds().contains(RightDownHitPosX + 135, RightDownHitPosY + 135)) {
+                            MovementVector.push_back(sf::Vector2f(RightDownHitPosX + 135, RightDownHitPosY + 135));
+                            cell.setFillColor(sf::Color::Blue);
 
-        }
+                        }
+                    }
+                }
+            
+
         if (!MovementVector.empty()) return MovementVector;
+
         // Выделение синим цветов полей пригодных для хода
         for (auto& cell : m_cells)
         {
-            if (!LeftCellIsFull && cell.getGlobalBounds().contains(newPos1, newPos2))
+            if (Lmove
+                && cell.getGlobalBounds().contains(newPos1, newPos2))
             {
                 cell.setFillColor(sf::Color::Blue);
                 MovementVector.push_back(sf::Vector2f(newPos1, newPos2));
             }
 
-            if (!RightCellIsFull && cell.getGlobalBounds().contains(newPos3, newPos4))
+            if (Rmove && cell.getGlobalBounds().contains(newPos3, newPos4))
             {
                 cell.setFillColor(sf::Color::Blue);
                 MovementVector.push_back(sf::Vector2f(newPos3, newPos4));
 
             }
+            
         }
+
+
+
+
+        
     }
     return MovementVector;
 }
-
-std::vector<sf::Vector2f> Board::CheckCells(sf::Vector2f& position)
-{
-
-}
-
-
-
-
-
-
-
-
-
 
 
 sf::Vector2f Board::getPosition() const
@@ -332,4 +300,65 @@ void Board::AfterSelection(sf::RenderWindow& window, const sf::Vector2f& positio
         }
     }
     }
+}
+bool Board::CheckCellsForMove(std::vector<sf::CircleShape*>& checkers, const sf::Vector2f& position, sf::Color color)
+{
+    for (sf::CircleShape* checker : checkers)
+    {   // Проверка на наличие свободных полей для перемещения пешек на доске
+        sf::Vector2f chckPos = checker->getPosition();
+        for (int i = 0; i < m_cells.size() - 1; i++)
+        {
+            if (m_cells[i].getGlobalBounds().contains(position.x, position.y) && m_cells[i].getGlobalBounds().contains(chckPos)) // Если поле находится на координатах след. хода и содержит в ней пешку(проверка слеваВнизу)
+            {
+                // Следовательно влево нельзя идти, так как клетка содержит пешку какого либо цвета
+                m_cells[i].setFillColor(sf::Color::Yellow);
+
+                return false;
+                
+
+
+            }
+        }
+    }
+    return true;
+}
+bool Board::CheckForHit(std::vector<sf::CircleShape*>& checkers, const sf::Vector2f& position,sf::Vector2f hitPos, sf::Color color)
+{
+
+    for (sf::CircleShape* checker : checkers)
+    {   // Проверка на наличие свободных полей для перемещения пешек на доске
+        sf::Vector2f chckPos = checker->getPosition();
+        sf::Color color1= checker->getFillColor();
+        for (int i = 0; i < m_cells.size() - 1; i++)
+        {
+            if (m_cells[i].getGlobalBounds().contains(position.x, position.y) && m_cells[i].getGlobalBounds().contains(chckPos) ) // Если поле находится на координатах след. хода и содержит в ней пешку
+            {
+
+
+                if (!(checker->getFillColor() == color))
+                {
+
+                    for (sf::CircleShape* checker1 : checkers)
+                    {
+                        for (auto& cell : m_cells)
+                        {
+                            if (cell.getGlobalBounds().contains(hitPos.x, hitPos.y) && cell.getGlobalBounds().contains(checker1->getPosition()))
+                            {   // Если след. после пешки которую хотим сбить занята,то нельзя сбивать
+
+                                return false;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+
+                    return false;
+                }
+
+            }
+          
+        }
+    }
+    return true;
 }

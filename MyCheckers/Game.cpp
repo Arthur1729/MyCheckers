@@ -2,7 +2,7 @@
 
 #include "Board.h"
 
-Game::Game() : m_window(sf::VideoMode(1080, 1080), "MyCheckers", sf::Style::Titlebar | sf::Style::Close), m_checkerSelected(0)
+Game::Game() : m_window(sf::VideoMode(1080, 1080), "MyCheckers", sf::Style::Titlebar | sf::Style::Close)
 {
   
 }
@@ -120,6 +120,11 @@ void Game::run()
             if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
             {
                 m_window.close();
+
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+            {
+                run();
             }
 
             if (event.type == sf::Event::MouseButtonPressed)
@@ -132,7 +137,7 @@ void Game::run()
                     { 
                     for (sf::CircleShape* checker : checkers)
                     {   
-                        if (checker->getGlobalBounds().contains(mouseX, mouseY) && m_checkerSelected==0)
+                        if (checker->getGlobalBounds().contains(mouseX, mouseY) )
                         {
                             
                             MovementVector=board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checkers);
@@ -166,6 +171,55 @@ void Game::run()
 
                                 if (destinationRect.contains(mouseX, mouseY))
                                 {
+                                    if (abs(movement.x - selectedChecker->getPosition().x) > 140 && abs(movement.y - selectedChecker->getPosition().y))
+                                    {
+                                       
+                                        sf::Vector2f RemovablePos;
+                                        sf::CircleShape* hitChecker = nullptr; 
+                                        float removeCheckerX=movement.x - selectedChecker->getPosition().x;
+                                        float removeCheckerY=movement.y - selectedChecker->getPosition().y;
+                                        
+                                        if (removeCheckerX > 0 && removeCheckerY > 0) {
+                                            // Оба числа положительные
+                                           RemovablePos= sf::Vector2f (selectedChecker->getPosition().x + 135, selectedChecker->getPosition().y + 135);
+                                        }
+                                        else if (removeCheckerX > 0 && removeCheckerY < 0) {
+                                            // a положительное, b отрицательное
+                                             RemovablePos = sf::Vector2f(selectedChecker->getPosition().x + 135, selectedChecker->getPosition().y - 135);
+                                        }
+                                        else if (removeCheckerX < 0 && removeCheckerY > 0) {
+                                            // a отрицательное, b положительное
+                                             RemovablePos = sf::Vector2f(selectedChecker->getPosition().x - 135, selectedChecker->getPosition().y + 135);
+                                        }
+                                        else {
+                                            // Оба числа отрицательные 
+                                             RemovablePos = sf::Vector2f(selectedChecker->getPosition().x - 135, selectedChecker->getPosition().y - 135);
+                                        }
+                                        
+                                        
+                                         
+                                        std::cout << "x: " << RemovablePos.x << " y: " << RemovablePos.y << "\n";
+                                        for (sf::CircleShape* checker : checkers) {
+                                            if (checker->getGlobalBounds().contains(RemovablePos)) {
+                                                
+                                                hitChecker = checker;
+                                                break;
+                                            }
+                                        }
+
+                                        // Если пешка была сбита, удаляем её из вектора checkers и освобождаем память
+                                        if (hitChecker != nullptr) {
+                                            auto it = std::find(checkers.begin(), checkers.end(), hitChecker);
+                                            if (it != checkers.end()) {
+                                                checkers.erase(it);
+                                                
+                                            }
+                                        
+                                    }
+                                   }
+                                    
+                                    selectedChecker->setPosition(movement);
+                                    
                                     selectedChecker->setPosition(movement);
                                     selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
                                     selectedChecker = nullptr;
