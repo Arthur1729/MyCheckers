@@ -21,6 +21,8 @@ void setChecker(sf::CircleShape* checker, int line, int part,int row, sf::Color 
 
     checker->setPosition(x, y);
     checker->setFillColor(color);
+    checker->setOutlineColor(sf::Color(128, 128, 128, 200));
+    checker->setOutlineThickness(10);
    }
 void Game::run()
 {
@@ -104,17 +106,15 @@ void Game::run()
         else setChecker(checker, 6, i-20,2, sf::Color(0, 255, 0, 255));
       
     }
-    sf::Color gr(0, 255, 0, 255);
-    sf::Color red(255, 0, 0, 255);
-    std::cout << "RGBA for Green\n"
-        << static_cast<int>(gr.r) << " and " << static_cast<int>(red.r);
+  
     
     bool mode = 0;
-    
+    std::vector<sf::Vector2f> MovementVector;
     while (m_window.isOpen())
     {
         
         sf::Event event;
+        
         while (m_window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
@@ -128,16 +128,57 @@ void Game::run()
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {   double mouseX = sf::Mouse::getPosition(m_window).x;
                     double mouseY = sf::Mouse::getPosition(m_window).y;
-                    
+                    if(selectedChecker==nullptr)
+                    { 
                     for (sf::CircleShape* checker : checkers)
-                    {
+                    {   
                         if (checker->getGlobalBounds().contains(mouseX, mouseY) && m_checkerSelected==0)
                         {
-                       
                             
-                            board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checkers);
-                            board.CheckHitMoves(checker->getPosition(), checker->getFillColor(), checkers);
-                            m_checkerSelected = false;
+                            MovementVector=board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checkers);
+                            selectedChecker = checker;
+                            
+                            break;
+                           
+                        }
+                       }
+                        
+                    }
+                    else
+                    {
+                        
+                        if (selectedChecker->getGlobalBounds().contains(mouseX, mouseY))
+                        {   
+                            selectedChecker = nullptr;
+                            
+                            board.AfterSelection(m_window,sf::Vector2f(0,0));// —бросить выбор
+                        }
+                        else
+                        {
+                            if (!MovementVector.empty())
+                            {
+                            
+                            for (const sf::Vector2f& movement : MovementVector)
+                            {
+                                sf::FloatRect destinationRect(selectedChecker->getGlobalBounds());
+                                destinationRect.left = movement.x;
+                                destinationRect.top = movement.y;
+
+                                if (destinationRect.contains(mouseX, mouseY))
+                                {
+                                    selectedChecker->setPosition(movement);
+                                    selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
+                                    selectedChecker = nullptr;
+                                    board.AfterSelection(m_window, sf::Vector2f(0, 0)); // —бросить выбор
+                                    break;
+                                }
+                            }}
+                            else
+                            {
+
+                                selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
+                                selectedChecker = nullptr;
+                            }
                         }
                     }
                    
@@ -149,6 +190,8 @@ void Game::run()
         board.draw(m_window);
         for (sf::CircleShape* checker : checkers)
         {
+            if (checker == selectedChecker)
+                selectedChecker->setOutlineColor(sf::Color::White);
             m_window.draw(*checker);
         }
 

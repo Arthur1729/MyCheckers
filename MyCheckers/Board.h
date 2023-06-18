@@ -11,11 +11,12 @@ public:
 
     void AfterSelection(sf::RenderWindow& window, const sf::Vector2f& position);
 
-    std::vector<sf::Vector2f> ShowLegalMoves(const sf::Vector2f& position,sf::Color color, std::vector<sf::CircleShape*>& checkers);
-    
-  
-    //std::vector<sf::Vector2f> 
-    void CheckHitMoves(const sf::Vector2f& position, sf::Color color, std::vector<sf::CircleShape*>& checkers);
+    std::vector<sf::Vector2f> ShowLegalMoves(const sf::Vector2f& position, sf::Color color, std::vector<sf::CircleShape*>& checkers);
+    std::vector<sf::Vector2f> CheckCells(sf::Vector2f& position);
+   
+
+     
+   
 
     sf::Vector2f getPosition() const;
     float getCellSize() const;
