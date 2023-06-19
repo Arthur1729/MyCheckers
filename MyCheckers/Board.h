@@ -11,8 +11,11 @@ public:
 
     void AfterSelection(sf::RenderWindow& window, const sf::Vector2f& position);
 
-    std::vector<sf::Vector2f> ShowLegalMoves(const sf::Vector2f& position, sf::Color color, std::vector<sf::CircleShape*>& checkers);
-    std::vector<sf::Vector2f> CheckCells(sf::Vector2f& position);
+    std::vector<sf::Vector2f> ShowLegalMoves(const sf::Vector2f& position, sf::Color color, sf::Color outlineColor, std::vector<sf::CircleShape*>& checkers);
+    std::vector<sf::Vector2f> checkCellForKingsMove(sf::CircleShape* ñhecker, float startX, float startY, float step, float endX, float endY, sf::Color color);
+
+    sf::CircleShape* findSelectedChecker(const std::vector<sf::CircleShape*>& checkers, float targetX, float targetY, float step, sf::RectangleShape* cell);
+  
    
 
      

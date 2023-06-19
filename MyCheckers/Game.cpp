@@ -140,7 +140,7 @@ void Game::run()
                         if (checker->getGlobalBounds().contains(mouseX, mouseY) )
                         {
                             
-                            MovementVector=board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checkers);
+                            MovementVector=board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checker->getOutlineColor(),checkers);
                             selectedChecker = checker;
                             
                             break;
@@ -221,7 +221,11 @@ void Game::run()
                                     selectedChecker->setPosition(movement);
                                     
                                     selectedChecker->setPosition(movement);
-                                    selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
+                                   
+                                    if (selectedChecker->getFillColor() == sf::Color::Red && selectedChecker->getPosition().y >= 945) selectedChecker->setOutlineColor(sf::Color::Green); //Дамка для красных фигур
+                                    else if (selectedChecker->getFillColor() == sf::Color::Green && selectedChecker->getPosition().y <= 30) selectedChecker->setOutlineColor(sf::Color::Red);// Дамка для зеленых фигур
+                                    else selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
+
                                     selectedChecker = nullptr;
                                     board.AfterSelection(m_window, sf::Vector2f(0, 0)); // Сбросить выбор
                                     break;
@@ -244,8 +248,8 @@ void Game::run()
         board.draw(m_window);
         for (sf::CircleShape* checker : checkers)
         {
-            if (checker == selectedChecker)
-                selectedChecker->setOutlineColor(sf::Color::White);
+          
+               
             m_window.draw(*checker);
         }
 

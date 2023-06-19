@@ -35,7 +35,7 @@ void Board::draw(sf::RenderWindow& window)
         window.draw(cell);
     }
 }
-std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf::Color color, std::vector<sf::CircleShape*>& checkers) 
+std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf::Color color,sf::Color outlineColor, std::vector<sf::CircleShape*>& checkers) 
 {   
     bool LeftCellIsFull = false;
     bool RightCellIsFull = false;
@@ -139,7 +139,22 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
 
     }
     else if (color == sf::Color::Green)
-    {
+    {   
+        if (outlineColor == sf::Color::Red)
+        {
+
+            //MovementVector = checkCellForKingsMove(position, color, checkers);
+
+
+
+
+
+
+
+
+
+
+        }
 
         int newPos1 = position.x - 135;
         int newPos2 = position.y - 135;
@@ -246,6 +261,102 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
     return MovementVector;
 }
 
+std::vector<sf::Vector2f> Board::checkCellForKingsMove(sf::CircleShape* сhecker, float startX, float startY, float step,float endX,float endY,sf::Color color)
+{
+    std::vector<sf::Vector2f> MovementVector;
+    sf::CircleShape* selectedChecker;
+    
+    for (auto& cell : m_cells)
+    {
+        if (cell.getGlobalBounds().contains(startX, startY))
+        {
+            
+                if (cell.getLocalBounds().contains(сhecker->getPosition()))
+                {
+                    cell.setFillColor(sf::Color::Yellow);
+                    if(сhecker->getFillColor()==color)
+                    {
+                        return MovementVector;
+                    }
+                    else if (сhecker->getFillColor() != color)
+                    {
+                        return MovementVector;
+                    }
+
+                }
+            
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return MovementVector;
+
+   
+}
+sf::CircleShape* Board::findSelectedChecker(const std::vector<sf::CircleShape*>& checkers, float targetX, float targetY,float step,sf::RectangleShape* cell)
+{
+
+
+    sf::CircleShape* selectedChecker = nullptr;
+
+    for (sf::CircleShape* checker : checkers)
+    {
+        // Получаем текущую позицию по x и y
+        float currentX = checker->getPosition().x;
+        float currentY = checker->getPosition().y;
+
+        // Проверяем, соответствуют ли текущие значения позиции целевым значениям
+        if (currentX == targetX && currentY == targetY)
+        {
+            selectedChecker = checker;
+            return selectedChecker;
+            break;
+        }
+    }
+
+    return nullptr;
+}
 
 sf::Vector2f Board::getPosition() const
 {
