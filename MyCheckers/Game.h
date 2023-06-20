@@ -11,14 +11,18 @@ public:
 	sf::RectangleShape rect(sf::Vector2f(float n,float b));
 	sf::CircleShape* selectedChecker = nullptr;
 	sf::CircleShape* hitChecker = nullptr;
+
 protected:
 	void drawChessboard(sf::RenderWindow& window);
 	sf::RenderWindow m_window;
-	sf::Font Logo_font;
-	sf::Text Logo_text;
-	sf::Text Settings;
-	sf::Texture Background_texture;
-	sf::Sprite Background_sprite;
-	bool m_checkerSelected;
+
+	sf::Texture settings_Texture;
+	sf::Texture restartButton_Texture;
+	sf::Sprite restartButton_Sprite;
+	sf::Texture instruc_Texture;
+	sf::Sprite settings_Sprite;
+	sf::Sprite instuc_Sprite;
+	bool isRectangleVisible;
+	sf::RectangleShape rectangle;
 };
 

@@ -1,8 +1,7 @@
 #include "Game.h"
-
 #include "Board.h"
 
-Game::Game() : m_window(sf::VideoMode(1080, 1080), "MyCheckers", sf::Style::Titlebar | sf::Style::Close)
+Game::Game() : m_window(sf::VideoMode(1080, 1080), "Checkers", sf::Style::Titlebar | sf::Style::Close), isRectangleVisible(false)
 {
   
 }
@@ -26,7 +25,7 @@ void setChecker(sf::CircleShape* checker, int line, int part,int row, sf::Color 
    }
 void Game::run()
 {
-   
+    bool isRedTurn = false;
 
     sf::Vector2u windowSize = m_window.getSize();
     unsigned int windowWidth = windowSize.x;
@@ -35,12 +34,45 @@ void Game::run()
     float cellSize = windowSize.x / 8;
     Board board(sf::Vector2f(0, 0), cellSize, 8, 8);
 
+    
+    if (!settings_Texture.loadFromFile("assets/rules.png")) std::cout << "Problem with rule.png";
+    if (!instruc_Texture.loadFromFile("assets/rulesPNG.png")) std::cout << "global error!!!!!!!";
+    if (!restartButton_Texture.loadFromFile("assets/restart.jpg")) std::cout << "another global error!!!!!!!";
+    settings_Texture.setSmooth(10);
+    settings_Sprite.setTexture(settings_Texture);
+    settings_Sprite.setPosition(550, 550);
+    settings_Sprite.setScale(0.2f, 0.2f);
+    
+    
+    instuc_Sprite.setTexture(instruc_Texture);
+    instuc_Sprite.setPosition(windowSize.x / 2 - instruc_Texture.getSize().x/2, (windowWidth / 2)-instruc_Texture.getSize().y/2);
+    
+    restartButton_Sprite.setTexture(restartButton_Texture);
+    restartButton_Sprite.setPosition(830, 550);
+    restartButton_Sprite.setScale(0.5f, 0.5f);
+ 
+    
+    
+   
+    sf::Font font;
+    if (!font.loadFromFile("assets/font.ttf")) {
+        // Обработка ошибки загрузки шрифта
+    }
+    sf::Text text;
+    text.setFont(font);
+    text.setString(" ");
+    text.setCharacterSize(28);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(270, 565);
 
-    sf::CircleShape firstChecker(windowSize.x /20);
-    firstChecker.setFillColor(sf::Color::Red);
-    firstChecker.setPosition(0, 135);
-    sf::Color orange(255, 140, 0);
-        
+    sf::Text Win;
+    Win.setFont(font);
+    Win.setString(" ");
+    Win.setCharacterSize(81);
+    Win.setFillColor(sf::Color::White);
+    Win.setPosition(windowSize.x/2-450, windowSize.y/2-135);
+
+   
     std::vector<sf::CircleShape*> checkers;
 
     sf::CircleShape checker1W(windowSize.x / 20);
@@ -107,8 +139,10 @@ void Game::run()
       
     }
   
-    
-    bool mode = 0;
+    int WhiteCheckers = 12;
+    int BlackCheckers = 12;
+    bool whiteWin = false;
+    bool blackWin = false;
     std::vector<sf::Vector2f> MovementVector;
     while (m_window.isOpen())
     {
@@ -122,6 +156,8 @@ void Game::run()
                 m_window.close();
 
             }
+            if (WhiteCheckers == 1) blackWin = true;
+            else if (BlackCheckers == 1) whiteWin = true;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
             {
                 run();
@@ -129,29 +165,37 @@ void Game::run()
 
             if (event.type == sf::Event::MouseButtonPressed)
             {
-
+                
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {   double mouseX = sf::Mouse::getPosition(m_window).x;
                     double mouseY = sf::Mouse::getPosition(m_window).y;
-                    if(selectedChecker==nullptr)
+                    
+                    if (!isRectangleVisible && settings_Sprite.getGlobalBounds().contains(mouseX, mouseY))
+                    {
+                        isRectangleVisible = true;
+                    }
+                    else isRectangleVisible = false;
+                    if (restartButton_Sprite.getGlobalBounds().contains(mouseX, mouseY)) run();
+                    if(selectedChecker==nullptr )
                     { 
                     for (sf::CircleShape* checker : checkers)
                     {   
                         if (checker->getGlobalBounds().contains(mouseX, mouseY) )
-                        {
-                            
-                            MovementVector=board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checker->getOutlineColor(),checkers);
+                        {   
+                            if((isRedTurn && checker->getFillColor() == sf::Color::Red) ||
+                                (!isRedTurn && checker->getFillColor() == sf::Color::Green)){ 
+                            MovementVector=board.ShowLegalMoves(checker->getPosition(),checker->getFillColor(),checker->getOutlineColor(),checkers,0);
                             selectedChecker = checker;
                             
-                            break;
+                            break;}
                            
                         }
                        }
                         
-                    }
-                    else
-                    {
-                        
+                    } 
+                    
+                    else if(selectedChecker!=nullptr )
+                    {  
                         if (selectedChecker->getGlobalBounds().contains(mouseX, mouseY))
                         {   
                             selectedChecker = nullptr;
@@ -198,11 +242,13 @@ void Game::run()
                                         
                                         
                                          
-                                        std::cout << "x: " << RemovablePos.x << " y: " << RemovablePos.y << "\n";
+                                       
                                         for (sf::CircleShape* checker : checkers) {
                                             if (checker->getGlobalBounds().contains(RemovablePos)) {
                                                 
                                                 hitChecker = checker;
+                                                if (hitChecker->getFillColor() == sf::Color::Red) WhiteCheckers--;
+                                                else BlackCheckers--;
                                                 break;
                                             }
                                         }
@@ -210,7 +256,8 @@ void Game::run()
                                         // Если пешка была сбита, удаляем её из вектора checkers и освобождаем память
                                         if (hitChecker != nullptr) {
                                             auto it = std::find(checkers.begin(), checkers.end(), hitChecker);
-                                            if (it != checkers.end()) {
+                                            if (it != checkers.end()) 
+                                            {
                                                 checkers.erase(it);
                                                 
                                             }
@@ -218,25 +265,22 @@ void Game::run()
                                     }
                                    }
                                     
-                                    selectedChecker->setPosition(movement);
+                             
                                     
                                     selectedChecker->setPosition(movement);
                                    
                                     if (selectedChecker->getFillColor() == sf::Color::Red && selectedChecker->getPosition().y >= 945) selectedChecker->setOutlineColor(sf::Color::Green); //Дамка для красных фигур
                                     else if (selectedChecker->getFillColor() == sf::Color::Green && selectedChecker->getPosition().y <= 30) selectedChecker->setOutlineColor(sf::Color::Red);// Дамка для зеленых фигур
-                                    else selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
-
+                                    isRedTurn=(isRedTurn == 1) ? 0 : 1;
                                     selectedChecker = nullptr;
                                     board.AfterSelection(m_window, sf::Vector2f(0, 0)); // Сбросить выбор
                                     break;
                                 }
                             }}
-                            else
-                            {
-
-                                selectedChecker->setOutlineColor(sf::Color(128, 128, 128, 200));
-                                selectedChecker = nullptr;
-                            }
+                            else selectedChecker = nullptr;
+                            
+                                
+                            
                         }
                     }
                    
@@ -252,7 +296,36 @@ void Game::run()
                
             m_window.draw(*checker);
         }
-
+        m_window.draw(settings_Sprite);
+        
+        if (isRedTurn)
+        {
+            text.setFillColor(sf::Color::Red);
+            text.setString("Red turn");
+        }
+        else
+        {
+            text.setFillColor(sf::Color(0, 100, 0));
+            text.setString("Green turn");
+        }
+        m_window.draw(text);
+        m_window.draw(restartButton_Sprite);
+        if(isRectangleVisible) m_window.draw(instuc_Sprite);
+        if (whiteWin)
+        {
+            Win.setString("Red checkers - Winners");
+            Win.setFillColor(sf::Color::Red);
+            m_window.draw(Win);
+        }
+        else if (blackWin)
+        {
+            Win.setString("Green checkers - Winners");
+            Win.setFillColor(sf::Color(0, 100, 0));
+            m_window.draw(Win);
+        }
+        
         m_window.display();
     }
 }
+
+

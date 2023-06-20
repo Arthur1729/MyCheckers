@@ -133,19 +133,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
-    <ClCompile Include="Checkers.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="MyCheckers.cpp" />
-    <ClCompile Include="Pieces.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
-    <ClInclude Include="Checkers.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="Pieces.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Bitmap.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -35,7 +35,7 @@ void Board::draw(sf::RenderWindow& window)
         window.draw(cell);
     }
 }
-std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf::Color color,sf::Color outlineColor, std::vector<sf::CircleShape*>& checkers) 
+std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf::Color color,sf::Color outlineColor, std::vector<sf::CircleShape*>& checkers,int extraHit) 
 {   
     bool LeftCellIsFull = false;
     bool RightCellIsFull = false;
@@ -50,27 +50,29 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
     std::vector<sf::Vector2f> MovementVector;
 
     if (color == sf::Color::Red)
-    {
-        int newPosition1 = position.x - 135;
-        int newPosition2 = position.y + 135; //y для хода слеваВниз
-        int newPos3 = position.x + 135;
-        int newPos4 = position.y + 135;// y для хода справаВниз
-        int LeftDownHitPosX = position.x-135;
-        int LeftDownHitPosY = position.y-135;
-        int RightDownHitPosX = position.x+135;
-        int RightDownHitPosY = position.y-135;
-        Lmove = CheckCellsForMove(checkers, sf::Vector2f(newPosition1, newPosition2),color);
-        if (!Lmove) NextFromLeftCell = CheckForHit(checkers, sf::Vector2f(newPosition1, newPosition2), sf::Vector2f(newPosition1 - 135, newPosition2 + 135), color);
-      
-        Rmove = CheckCellsForMove(checkers, sf::Vector2f(newPos3, newPos4), color);
-        if (!Rmove)NextFromRightCell = CheckForHit(checkers, sf::Vector2f(newPos3 , newPos4 ), sf::Vector2f(newPos3 + 135, newPos4 + 135), color);
-        
-        rDmove = CheckCellsForMove(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), color);
-        if (!rDmove) NextFromRDCell = CheckForHit(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), sf::Vector2f(RightDownHitPosX+135, RightDownHitPosY-135), color);
+    {       int newPosition1 = position.x - 135;
+            int newPosition2 = position.y + 135; //y для хода слеваВниз
+            int newPos3 = position.x + 135;
+            int newPos4 = position.y + 135;// y для хода справаВниз
+            int LeftDownHitPosX = position.x - 135;
+            int LeftDownHitPosY = position.y - 135;
+            int RightDownHitPosX = position.x + 135;
+            int RightDownHitPosY = position.y - 135;
+       
 
-        lDmove = CheckCellsForMove(checkers, sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY), color);
-        if (!lDmove) NextFromLDCell = CheckForHit(checkers, sf::Vector2f(LeftDownHitPosX,LeftDownHitPosY), sf::Vector2f(LeftDownHitPosX - 135, LeftDownHitPosY-135), color);
+            
+            Lmove = CheckCellsForMove(checkers, sf::Vector2f(newPosition1, newPosition2), color);
+            if (!Lmove) NextFromLeftCell = CheckForHit(checkers, sf::Vector2f(newPosition1, newPosition2), sf::Vector2f(newPosition1 - 135, newPosition2 + 135), color);
 
+            Rmove = CheckCellsForMove(checkers, sf::Vector2f(newPos3, newPos4), color);
+            if (!Rmove)NextFromRightCell = CheckForHit(checkers, sf::Vector2f(newPos3, newPos4), sf::Vector2f(newPos3 + 135, newPos4 + 135), color);
+
+            rDmove = CheckCellsForMove(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), color);
+            if (!rDmove) NextFromRDCell = CheckForHit(checkers, sf::Vector2f(RightDownHitPosX, RightDownHitPosY), sf::Vector2f(RightDownHitPosX + 135, RightDownHitPosY - 135), color);
+
+            lDmove = CheckCellsForMove(checkers, sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY), color);
+            if (!lDmove) NextFromLDCell = CheckForHit(checkers, sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY), sf::Vector2f(LeftDownHitPosX - 135, LeftDownHitPosY - 135), color);
+        if (extraHit == 1) std::cout << "First step is passed\n";
         // Выделение синим цветов полей пригодных для сбития
         for (auto& cell : m_cells)
         {
@@ -91,7 +93,7 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                     }
                 }
             }
-            if (NextFromLDCell && !lDmove)
+            if ((NextFromLDCell && !lDmove) && outlineColor==sf::Color::Green)
             {
                 for (auto& cell : m_cells)
                 {
@@ -102,7 +104,7 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                     }
                 }
             }
-            if (NextFromRDCell && !rDmove)
+            if ((NextFromRDCell && !rDmove) && outlineColor == sf::Color::Green)
             {
                 for (auto& cell : m_cells)
                 {
@@ -116,8 +118,8 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
             
            
         }
-        if (!MovementVector.empty()) return MovementVector;
-    
+        if (!MovementVector.empty() ) return MovementVector;
+       
             // Выделение синим цветов полей пригодных для хода
             for (auto& cell : m_cells)
             {   
@@ -134,27 +136,25 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                 MovementVector.push_back(sf::Vector2f(newPos3, newPos4));
 
             }
+            if (rDmove && cell.getGlobalBounds().contains(RightDownHitPosX, RightDownHitPosY) && outlineColor == sf::Color::Green)
+            {
+                cell.setFillColor(sf::Color::Blue);
+                MovementVector.push_back(sf::Vector2f(RightDownHitPosX, RightDownHitPosY));
+
+            }
+            if (lDmove && cell.getGlobalBounds().contains(LeftDownHitPosX, LeftDownHitPosY) && outlineColor == sf::Color::Green)
+            {
+                cell.setFillColor(sf::Color::Blue);
+                MovementVector.push_back(sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY));
+
+            }
         }
 
 
     }
     else if (color == sf::Color::Green)
     {   
-        if (outlineColor == sf::Color::Red)
-        {
-
-            //MovementVector = checkCellForKingsMove(position, color, checkers);
-
-
-
-
-
-
-
-
-
-
-        }
+        
 
         int newPos1 = position.x - 135;
         int newPos2 = position.y - 135;
@@ -204,8 +204,9 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                         cell.setFillColor(sf::Color::Blue);
 
                     }
-                }}
-                if (NextFromLDCell && !lDmove)
+                }
+            }
+                if (NextFromLDCell && !lDmove && outlineColor==sf::Color::Red)
                 {
                    
                     for (auto& cell : m_cells)
@@ -218,7 +219,7 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                         }
                     }
                 }
-                if (NextFromRDCell && !rDmove)
+                if (NextFromRDCell && !rDmove && outlineColor == sf::Color::Red)
                 {
                     for (auto& cell : m_cells)
                     {
@@ -250,6 +251,18 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
                 MovementVector.push_back(sf::Vector2f(newPos3, newPos4));
 
             }
+            if (rDmove && cell.getGlobalBounds().contains(RightDownHitPosX, RightDownHitPosY) && outlineColor == sf::Color::Red)
+            {
+                cell.setFillColor(sf::Color::Blue);
+                MovementVector.push_back(sf::Vector2f(RightDownHitPosX, RightDownHitPosY));
+
+            }
+            if (lDmove && cell.getGlobalBounds().contains(LeftDownHitPosX, LeftDownHitPosY)&&outlineColor==sf::Color::Red)
+            {
+                cell.setFillColor(sf::Color::Blue);
+                MovementVector.push_back(sf::Vector2f(LeftDownHitPosX, LeftDownHitPosY));
+
+            }
             
         }
 
@@ -261,9 +274,9 @@ std::vector<sf::Vector2f> Board::ShowLegalMoves(const sf::Vector2f& position, sf
     return MovementVector;
 }
 
-std::vector<sf::Vector2f> Board::checkCellForKingsMove(sf::CircleShape* сhecker, float startX, float startY, float step,float endX,float endY,sf::Color color)
+std::vector<sf::Vector2f> Board::checkCellForKingsMove(std::vector<sf::Vector2f> movementVector, std::vector<sf::CircleShape*>& checkers, float startX, float startY, float stepX, float stepY, float endX, float endY, sf::Color color)
 {
-    std::vector<sf::Vector2f> MovementVector;
+    std::vector<sf::Vector2f> MovementVector = movementVector;
     sf::CircleShape* selectedChecker;
     
     for (auto& cell : m_cells)
@@ -271,65 +284,9 @@ std::vector<sf::Vector2f> Board::checkCellForKingsMove(sf::CircleShape* сhecker,
         if (cell.getGlobalBounds().contains(startX, startY))
         {
             
-                if (cell.getLocalBounds().contains(сhecker->getPosition()))
-                {
-                    cell.setFillColor(sf::Color::Yellow);
-                    if(сhecker->getFillColor()==color)
-                    {
-                        return MovementVector;
-                    }
-                    else if (сhecker->getFillColor() != color)
-                    {
-                        return MovementVector;
-                    }
-
-                }
-            
+                
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     return MovementVector;
 
    
@@ -433,6 +390,7 @@ bool Board::CheckCellsForMove(std::vector<sf::CircleShape*>& checkers, const sf:
     }
     return true;
 }
+
 bool Board::CheckForHit(std::vector<sf::CircleShape*>& checkers, const sf::Vector2f& position,sf::Vector2f hitPos, sf::Color color)
 {
 
